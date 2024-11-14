@@ -47,7 +47,7 @@ const hotels = [
     id: 1,
     name: "Costa Pacifica",
     rating: 4.5,
-    price: 150,
+    price: 8250,
     image:
       "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/12/bb/65/a8/costa-pacifica.jpg?w=1200&h=-1&s=1",
     location: "Baler, Aurora",
@@ -57,7 +57,7 @@ const hotels = [
     id: 2,
     name: "Bay's Inn Resort",
     rating: 4.2,
-    price: 120,
+    price: 6600,
     image:
       "https://pix8.agoda.net/property/60263241/0/ea45117c4c9930d33d6b9749a4a5055c.jpeg?ce=0&s=1024x",
     location: "Baler, Aurora",
@@ -67,7 +67,7 @@ const hotels = [
     id: 3,
     name: "Aliya Surf Camp",
     rating: 4.0,
-    price: 100,
+    price: 5500,
     image:
       "https://media-cdn.tripadvisor.com/media/photo-s/12/a7/3f/e8/img-20180324-064351-largejpg.jpg",
     location: "Baler, Aurora",
@@ -77,7 +77,7 @@ const hotels = [
     id: 4,
     name: "Pacific Waves Inn",
     rating: 4.3,
-    price: 130,
+    price: 7150,
     image:
       "https://cf.bstatic.com/xdata/images/hotel/max1024x768/424217898.jpg?k=ef05b39cde8869464caabf8c31d4ed4145431c2d978ac3b3e931616730465e4c&o=&hp=1",
     location: "Baler, Aurora",
@@ -87,7 +87,7 @@ const hotels = [
     id: 5,
     name: "Nalu Surf Camp",
     rating: 4.6,
-    price: 160,
+    price: 8800,
     image:
       "https://nalusurfcamp.ph/wp-content/uploads/2022/03/nalu-about-us-1.png",
     location: "Baler, Aurora",
@@ -97,7 +97,7 @@ const hotels = [
     id: 6,
     name: "S.M.A.R.T Beach House Aurora",
     rating: 4.1,
-    price: 110,
+    price: 6050,
     image:
       "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0a/7f/a6/0b/20160226-081837-largejpg.jpg?w=1200&h=-1&s=1",
     location: "Baler, Aurora",
@@ -179,12 +179,6 @@ function HotelListingComponent() {
           </div>
           <nav className="flex items-center space-x-4">
             <Button variant="ghost">About</Button>
-            <Button
-              variant="ghost"
-              onClick={() => (window.location.href = "/login")}
-            >
-              Hotel Accommodation Inspection
-            </Button>
           </nav>
         </div>
       </header>
@@ -334,7 +328,7 @@ function HotelListingComponent() {
                             className="w-full h-48 object-cover"
                           />
                           <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded-full text-sm font-semibold text-gray-800">
-                            ${hotel.price}/night
+                            ₱{hotel.price}/night
                           </div>
                         </div>
                       </CardHeader>

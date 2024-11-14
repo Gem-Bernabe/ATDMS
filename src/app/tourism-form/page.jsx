@@ -1,10 +1,13 @@
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import Modal from "@/components/modal";
+import { useAuthUserStore } from "@/services/user";
+import { submitTourismForm } from "@/services/appwrite";
 import BasicInfo from "./BasicInfo";
 import Facilities from "./Facilities";
 import Rooms from "./Rooms";
@@ -14,17 +17,26 @@ import Employees from "./Employees";
 
 export default function TourismForm() {
   const [activeTab, setActiveTab] = useState("basic");
-  const methods = useForm({
-    defaultValues: {
-      // Default values for all your form fields
-    },
-  });
+  const methods = useForm();
+  const { authUser, clearAuthUser } = useAuthUserStore();
+  const router = useRouter();
 
-  const onSubmit = (data) => {
-    console.log(data);
+  useEffect(() => {
+    if (!authUser) {
+      router.push("/login"); // Redirect to login if no auth user
+    }
+  }, [authUser, router]);
+
+  const onSubmit = async (data) => {
+    try {
+      const response = await submitTourismForm(data);
+      console.log("Successfully submitted form:", response);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
 
-  return (
+  return authUser ? (
     <FormProvider {...methods}>
       <div className="container mx-auto py-10">
         <Card>
@@ -45,7 +57,6 @@ export default function TourismForm() {
                   <TabsTrigger value="services">Services</TabsTrigger>
                   <TabsTrigger value="employees">Employees</TabsTrigger>
                 </TabsList>
-
                 <TabsContent value="basic">
                   <BasicInfo />
                 </TabsContent>
@@ -65,46 +76,17 @@ export default function TourismForm() {
                   <Employees />
                 </TabsContent>
               </Tabs>
-
               <div className="flex justify-between">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => {
-                    const tabs = [
-                      "basic",
-                      "facilities",
-                      "rooms",
-                      "cottages",
-                      "services",
-                      "employees",
-                    ];
-                    const currentIndex = tabs.indexOf(activeTab);
-                    if (currentIndex > 0) {
-                      setActiveTab(tabs[currentIndex - 1]);
-                    }
-                  }}
+                  onClick={() => setActiveTab((prevTab) => prevTab)}
                 >
                   Previous
                 </Button>
                 <Button
                   type="button"
-                  onClick={() => {
-                    const tabs = [
-                      "basic",
-                      "facilities",
-                      "rooms",
-                      "cottages",
-                      "services",
-                      "employees",
-                    ];
-                    const currentIndex = tabs.indexOf(activeTab);
-                    if (currentIndex < tabs.length - 1) {
-                      setActiveTab(tabs[currentIndex + 1]);
-                    } else {
-                      methods.handleSubmit(onSubmit)();
-                    }
-                  }}
+                  onClick={() => methods.handleSubmit(onSubmit)()}
                 >
                   {activeTab === "employees" ? "Submit" : "Next"}
                 </Button>
@@ -114,5 +96,12 @@ export default function TourismForm() {
         </Card>
       </div>
     </FormProvider>
+  ) : (
+    <Modal isOpen={true} onClose={() => router.push("/login")}>
+      <div>
+        <h2 className="text-lg font-semibold">Login Required</h2>
+        <p className="mt-2">You must be logged in to access this page.</p>
+      </div>
+    </Modal>
   );
 }

@@ -266,8 +266,8 @@ function UserActivityLog() {
                           <SelectValue placeholder="Filter" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All</SelectItem>
-                          {Array.from(
+                        <SelectItem value="all">All</SelectItem>
+                        {Array.from(
                             new Set(activities.map((a) => String(a[column])))
                           ).map((value) => (
                             <SelectItem key={value} value={value}>

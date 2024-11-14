@@ -6,13 +6,8 @@ const appwriteConfig = {
   projectId: "672cfc4e003a4709c911", // Your Appwrite project ID
   databaseId: "672cfccb002f456cb332", // Your Appwrite database ID
   userCollectionId: "672cfcd0003c114264cd", // Your Appwrite user collection ID
+  clientCollectionId: "6733b503002217cbe823", // Your Appwrite client collection ID
 };
-
-// Debugging logs to verify that variables are loaded
-console.log("Endpoint:", appwriteConfig.endpoint);
-console.log("Project ID:", appwriteConfig.projectId);
-console.log("Database ID:", appwriteConfig.databaseId);
-console.log("User Collection ID:", appwriteConfig.userCollectionId);
 
 if (!appwriteConfig.endpoint || !appwriteConfig.projectId) {
   throw new Error("Appwrite environment variables are not defined.");
@@ -33,9 +28,22 @@ export async function createUser(email, password, name, role = "user") {
     const newAccount = await account.create(ID.unique(), email, password, name);
     if (!newAccount) throw new Error("Account creation failed.");
 
-    // Step 2: Sign in the new user to establish a session
-    const session = await account.createEmailPasswordSession(email, password);
-    if (!session) throw new Error("Failed to create session.");
+    // Check if there is already an active session
+    let session;
+    try {
+      session = await account.getSession("current");
+    } catch (error) {
+      if (
+        error.message.includes("Session not found") ||
+        error.message.includes("No active session")
+      ) {
+        // Step 2: Sign in the new user to establish a session
+        session = await account.createEmailPasswordSession(email, password);
+        if (!session) throw new Error("Failed to create session.");
+      } else {
+        throw error;
+      }
+    }
 
     // Step 3: Create the user document in the database
     const newUser = await databases.createDocument(
@@ -63,36 +71,35 @@ export async function signIn(email, password) {
   try {
     // Check if there is already an active session
     const currentSession = await account.getSession("current");
-    if (currentSession) {
-      console.log("User is already signed in.");
-      const currentAccount = await account.get();
-      if (!currentAccount) throw new Error("Unable to retrieve account.");
-      return currentAccount; // Return the current account if already signed in
-    }
+    console.log("User is already signed in.");
+    return currentSession; // Use the existing session if available
   } catch (error) {
-    // If there's no active session, proceed to create one
+    // Proceed to create a new session only if no active session exists
     if (
-      !error.message.includes("Session not found") &&
-      !error.message.includes("No active session")
+      error.message.includes("Session not found") ||
+      error.message.includes("No active session")
     ) {
-      console.error("Error checking session:", error.message);
-      throw new Error(error.message || "Error checking session");
-    }
-  }
-
-  try {
-    // Create a new session if no active session exists
-    const session = await account.createEmailPasswordSession(email, password);
-    if (session) {
-      const currentAccount = await account.get();
-      if (!currentAccount) throw new Error("Unable to retrieve account.");
-      return currentAccount; // Return the account if successful
+      try {
+        const newSession = await account.createEmailPasswordSession(
+          email,
+          password
+        );
+        if (newSession) {
+          console.log("New session created successfully.");
+          return newSession; // Return the new session if creation is successful
+        } else {
+          throw new Error("Failed to create new session.");
+        }
+      } catch (innerError) {
+        console.error("Error creating a new session:", innerError.message);
+        throw new Error(
+          innerError.message || "Error signing in with new session"
+        );
+      }
     } else {
-      throw new Error("Failed to create session.");
+      console.error("Error checking session:", error.message);
+      throw new Error(error.message || "Error checking existing session");
     }
-  } catch (error) {
-    console.error("Error signing in:", error.message);
-    throw new Error(error.message || "Error signing in");
   }
 }
 
@@ -167,5 +174,20 @@ export async function signOut() {
   } catch (error) {
     console.error("Error signing out:", error.message);
     throw new Error(error.message || "Error signing out");
+  }
+}
+
+export async function submitTourismForm(formData) {
+  try {
+    const result = await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.clientCollectionId,
+      ID.unique(),
+      formData
+    );
+    return result;
+  } catch (error) {
+    console.error("Failed to submit form data:", error);
+    throw new Error("Failed to submit form data");
   }
 }

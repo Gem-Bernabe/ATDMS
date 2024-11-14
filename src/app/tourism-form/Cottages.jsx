@@ -12,7 +12,7 @@ import { TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 
 export default function Cottages() {
-  const { register, control, handleSubmit, watch } = useForm({
+  const { register, control, watch } = useForm({
     defaultValues: {
       acCottages: [
         { name: "", size: "", capacity: "", rate: "", amenities: "" },

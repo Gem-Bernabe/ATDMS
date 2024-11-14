@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LockIcon, MailIcon, UserIcon } from "lucide-react";
-
 import { useRouter } from "next/navigation";
 import { createUser, signIn, getCurrentUser } from "@/services/appwrite";
+import { useAuthUserStore } from "@/services/user";
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("login");
@@ -26,11 +26,13 @@ export default function AuthPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { setAuthUser, clearAuthUser } = useAuthUserStore();
 
   const handleRoleRedirect = async () => {
     try {
       const user = await getCurrentUser();
       if (user && user.role) {
+        setAuthUser(user); // Set the user in the Zustand store
         switch (user.role) {
           case "admin":
             router.push("/admin");
@@ -39,11 +41,12 @@ export default function AuthPage() {
             router.push("/superadmin");
             break;
           default:
-            router.push("/dashboard");
+            router.push("/tourism-form");
         }
       }
     } catch (error) {
       console.error("Error fetching user role:", error);
+      clearAuthUser(); // Clear the user from the Zustand store on error
     }
   };
 
@@ -56,6 +59,7 @@ export default function AuthPage() {
       await handleRoleRedirect();
     } catch (error) {
       alert(error.message || "Login failed, please try again.");
+      clearAuthUser(); // Clear the user from the Zustand store on login failure
     } finally {
       setIsLoading(false);
     }
@@ -69,11 +73,12 @@ export default function AuthPage() {
     }
     setIsLoading(true);
     try {
-      await createUser(email, password, fullName, "users"); // Default role set to 'users'
+      await createUser(email, password, fullName, "user"); // Default role set to 'users'
       alert("Account created successfully!");
       setActiveTab("login"); // Switch to login tab after signup
     } catch (error) {
       alert(error.message || "Signup failed, please try again.");
+      clearAuthUser(); // Clear the user from the Zustand store on signup failure
     } finally {
       setIsLoading(false);
     }

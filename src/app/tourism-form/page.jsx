@@ -90,6 +90,13 @@ export default function TourismForm() {
                 >
                   {activeTab === "employees" ? "Submit" : "Next"}
                 </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push("/previewform")}
+              >
+                Preview
+              </Button>
               </div>
             </form>
           </CardContent>

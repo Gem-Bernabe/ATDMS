@@ -37,6 +37,8 @@
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
+    "react-router": "^7.0.1",
+    "react-router-dom": "^7.0.1",
     "react-toastify": "^10.0.6",
     "recharts": "^2.13.3",
     "tailwind-merge": "^2.5.4",

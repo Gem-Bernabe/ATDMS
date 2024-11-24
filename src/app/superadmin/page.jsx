@@ -1,191 +1,88 @@
 "use client";
 
-import * as React from "react";
 import { useState, useEffect } from "react";
-import {
-  Activity,
-  AlertCircle,
-  BarChart3,
-  Globe,
-  Home,
-  Shield,
-  Users,
-  LogOut,
-  Bell,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarProvider,
-} from "@/components/ui/sidebar";
 import { useRouter } from "next/navigation";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import Modal from "@/components/modal";
-import { useAuthUserStore } from "@/services/user";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
 
-// Mock data remains unchanged
-// ...
-
-export default function Dashboard() {
-  const [activePage, setActivePage] = useState("dashboard");
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isModalOpen, setModalOpen] = useState(false);
+export default function NotFound() {
+  const [countdown, setCountdown] = useState(10);
   const router = useRouter();
 
-  // Zustand store for authentication
-  const { authUser, clearAuthUser } = useAuthUserStore();
-
-  // Check authentication on component mount
   useEffect(() => {
-    if (!authUser) {
-      setModalOpen(true);
-    } else {
-      setModalOpen(false);
-    }
-  }, [authUser]);
+    const timer = setInterval(() => {
+      setCountdown((prevCount) => {
+        if (prevCount <= 1) {
+          clearInterval(timer);
+          router.push("/");
+          return 0;
+        }
+        return prevCount - 1;
+      });
+    }, 1000);
 
-  const handleLogout = () => {
-    clearAuthUser(); // Clear the user session
-    toast.success("You have been successfully logged out.");
-    router.push("/login"); // Redirect to the login page
-  };
-
-  const handleModalClose = () => {
-    setModalOpen(false);
-    handleLogout();
-  };
-
-  if (!authUser) {
-    return (
-      <Modal isOpen={isModalOpen} onClose={handleModalClose}>
-        <div>
-          <h2 className="text-lg font-semibold">Login Required</h2>
-          <p className="mt-2">You must be logged in to access this page.</p>
-        </div>
-      </Modal>
-    );
-  }
-
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
-  const renderPage = () => {
-    switch (activePage) {
-      case "dashboard":
-        return (
-          <DashboardContent
-            setActivePage={setActivePage}
-            notifications={[] /* Add your notifications data */}
-          />
-        );
-      // Add cases for other pages...
-      default:
-        return (
-          <DashboardContent
-            setActivePage={setActivePage}
-            notifications={[] /* Add your notifications data */}
-          />
-        );
-    }
-  };
+    return () => clearInterval(timer);
+  }, [router]);
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-screen overflow-hidden bg-gray-100">
-        <Sidebar
-          className={`transition-all duration-300 ${
-            isCollapsed ? "w-16" : "w-64"
-          }`}
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center text-center px-4">
+      <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white p-2 rounded-full shadow-lg"
+      >
+        <Image
+          src="https://www.vantagehunt.com/assets/images/vh/aurora-province-logo.jpg"
+          alt="Aurora Province Logo"
+          width={200}
+          height={200}
+          className="rounded-full"
+        />
+      </motion.div>
+      <motion.h1
+        className="text-6xl font-bold mb-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        Oops!
+      </motion.h1>
+      <motion.p
+        className="text-xl mb-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4, duration: 0.5 }}
+      >
+        Looks like you've ventured into uncharted territory.
+      </motion.p>
+      <motion.div
+        className="space-y-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6, duration: 0.5 }}
+      >
+        <p className="text-lg">
+          Embarking on a journey back home in{" "}
+          <motion.span
+            key={countdown}
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="font-bold text-blue-600"
+          >
+            {countdown}
+          </motion.span>{" "}
+          seconds
+        </p>
+        <Link
+          href="/"
+          className="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300"
         >
-          <SidebarHeader className="relative p-4">
-            <h1
-              className={`text-2xl font-bold text-blue-600 transition-opacity duration-300 ${
-                isCollapsed ? "opacity-0" : "opacity-100"
-              }`}
-            >
-              Tourism Admin
-            </h1>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
-                Main Menu
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {[{ icon: Home, label: "Dashboard", page: "dashboard" }]
-                    // Add more menu items here
-                    .map(({ icon: Icon, label, page }) => (
-                      <SidebarMenuItem key={page}>
-                        <Button
-                          variant={activePage === page ? "secondary" : "ghost"}
-                          className={`w-full justify-start ${
-                            isCollapsed ? "px-2" : "px-4"
-                          }`}
-                          onClick={() => setActivePage(page)}
-                        >
-                          <Icon
-                            className={`h-4 w-4 ${isCollapsed ? "" : "mr-2"}`}
-                          />
-                          {!isCollapsed && <span>{label}</span>}
-                        </Button>
-                      </SidebarMenuItem>
-                    ))}
-                  <SidebarMenuItem>
-                    <Button
-                      variant="ghost"
-                      className={`w-full justify-start ${
-                        isCollapsed ? "px-2" : "px-4"
-                      }`}
-                      onClick={handleLogout}
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      {!isCollapsed && <span>Logout</span>}
-                    </Button>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-        </Sidebar>
-
-        {/* Main Content */}
-        <div className="flex flex-col flex-1 w-full overflow-hidden">
-          <header className="bg-white shadow-sm">
-            <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-              <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate">
-                {activePage.charAt(0).toUpperCase() + activePage.slice(1)}
-              </h2>
-              <div className="flex items-center">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleLogout}
-                  title="Logout"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </header>
-          <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
-            {renderPage()}
-          </main>
-        </div>
-      </div>
-      <ToastContainer />
-    </SidebarProvider>
+          Teleport Home
+        </Link>
+      </motion.div>
+    </div>
   );
 }
-
-// Sub-components remain unchanged...

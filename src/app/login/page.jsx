@@ -41,7 +41,7 @@ export default function AuthPage() {
             router.push("/superadmin");
             break;
           default:
-            router.push("/admin");
+            router.push("/dashboard");
         }
       }
     } catch (error) {

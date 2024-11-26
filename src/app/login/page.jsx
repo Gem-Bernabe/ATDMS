@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +14,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LockIcon, MailIcon, UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createUser, signIn, getCurrentUser } from "@/services/appwrite";
+import { createUser, getCurrentUser, signIn } from "@/services/appwrite";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useAuthUserStore } from "@/services/user";
 
 export default function AuthPage() {
@@ -26,27 +27,37 @@ export default function AuthPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { setAuthUser, clearAuthUser } = useAuthUserStore();
+
+  const { setAuthUser, authUser } = useAuthUserStore();
 
   const handleRoleRedirect = async () => {
     try {
-      const user = await getCurrentUser();
-      if (user && user.role) {
-        setAuthUser(user); // Set the user in the Zustand store
-        switch (user.role) {
+      const currentUser = await getCurrentUser();
+      if (currentUser && currentUser.role) {
+        setAuthUser(currentUser); // Save current user with role
+        const role = currentUser.role;
+
+        switch (role) {
           case "admin":
+            toast.success(`Welcome back, ${currentUser.name}!`);
             router.push("/admin");
             break;
           case "superadmin":
+            toast.success(`Welcome back, ${currentUser.name}!`);
             router.push("/superadmin");
             break;
+          case "user":
           default:
+            toast.success(`Welcome back, ${currentUser.name}!`);
             router.push("/tourism-form");
+            break;
         }
+      } else {
+        toast.error("Unable to fetch user role.");
       }
     } catch (error) {
-      console.error("Error fetching user role:", error);
-      clearAuthUser(); // Clear the user from the Zustand store on error
+      console.error("Role redirection error:", error.message);
+      toast.error("Failed to determine user role. Please try again.");
     }
   };
 
@@ -54,12 +65,12 @@ export default function AuthPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await signIn(email, password);
-      alert("Logged in successfully!");
-      await handleRoleRedirect();
+      const user = await signIn(email, password); // Log in using Appwrite
+      setAuthUser(user); // Save user to store
+      await handleRoleRedirect(); // Redirect user based on their role
     } catch (error) {
-      alert(error.message || "Login failed, please try again.");
-      clearAuthUser(); // Clear the user from the Zustand store on login failure
+      console.error("Login error:", error.message);
+      toast.error(error.message || "Login failed, please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -68,17 +79,17 @@ export default function AuthPage() {
   const handleSignUp = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      toast.error("Passwords do not match!");
       return;
     }
     setIsLoading(true);
     try {
-      await createUser(email, password, fullName, "user"); // Default role set to 'users'
-      alert("Account created successfully!");
-      setActiveTab("login"); // Switch to login tab after signup
+      const newUser = await createUser(email, password, fullName);
+      toast.success("Account created successfully! Please log in.");
+      setActiveTab("login"); // Switch to login tab
     } catch (error) {
-      alert(error.message || "Signup failed, please try again.");
-      clearAuthUser(); // Clear the user from the Zustand store on signup failure
+      console.error("Signup error:", error.message);
+      toast.error(error.message || "Signup failed, please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -86,6 +97,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-400 to-indigo-600 flex items-center justify-center p-4">
+      <ToastContainer />
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">

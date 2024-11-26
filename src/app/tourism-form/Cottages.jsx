@@ -7,33 +7,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useFieldArray, useForm, useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 import { TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 
 export default function Cottages() {
-  const { register, control, watch } = useForm({
-    defaultValues: {
-      acCottages: [
-        { name: "", size: "", capacity: "", rate: "", amenities: "" },
-      ],
-      nonAcCottages: [
-        { name: "", size: "", capacity: "", rate: "", amenities: "" },
-      ],
-      tents: [{ name: "", size: "", capacity: "", rate: "", amenities: "" }],
-      adultPool: { depth: "", size: "" },
-      childrenPool: { depth: "", size: "" },
-      diningOutlets: { restaurant: false, bar: false, coffeeShop: false },
-      conferenceConvention: {
-        conventionHall: false,
-        conferenceHall: false,
-        functionHall: false,
-        meetingRoom: false,
-      },
-    },
-  });
+  const { register, control, watch } = useFormContext();
 
-  // Using useFieldArray for each category
+  // Using useFieldArray for dynamic fields
   const { fields: acCottageFields, append: appendAcCottage } = useFieldArray({
     control,
     name: "acCottages",
@@ -67,8 +48,8 @@ export default function Cottages() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {watch("acCottages").map((_, index) => (
-                <TableRow key={index}>
+              {acCottageFields.map((field, index) => (
+                <TableRow key={field.id}>
                   <TableCell>
                     <Input {...register(`acCottages.${index}.name`)} />
                   </TableCell>
@@ -127,8 +108,8 @@ export default function Cottages() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {watch("nonAcCottages").map((_, index) => (
-                <TableRow key={index}>
+              {nonAcCottageFields.map((field, index) => (
+                <TableRow key={field.id}>
                   <TableCell>
                     <Input {...register(`nonAcCottages.${index}.name`)} />
                   </TableCell>
@@ -187,8 +168,8 @@ export default function Cottages() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {watch("tents").map((_, index) => (
-                <TableRow key={index}>
+              {tentFields.map((field, index) => (
+                <TableRow key={field.id}>
                   <TableCell>
                     <Input {...register(`tents.${index}.name`)} />
                   </TableCell>

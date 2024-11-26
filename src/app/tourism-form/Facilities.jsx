@@ -232,7 +232,7 @@ export default function Facilities() {
               </div>
             </div>
             <div>
-              <h4 className="text-sm font-medium mb-2">Children's Pool</h4>
+              <h4 className="text-sm font-medium mb-2">Childrens Pool</h4>
               <div className="space-y-2">
                 <Input
                   placeholder="Depth"

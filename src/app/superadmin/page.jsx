@@ -82,6 +82,9 @@ import {
 import { useRouter } from "next/navigation";
 import Modal from "@/components/modal";
 import { useAuthUserStore } from "@/services/user";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { signOut } from "@/services/appwrite";
 
 // Mock data (unchanged)
 const visitorData = [
@@ -326,7 +329,9 @@ const alertsData = [
 ];
 
 export default function Dashboard() {
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const [activePage, setActivePage] = useState("dashboard");
+  const [isLoading, setIsLoading] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [notifications, setNotifications] = useState(alertsData);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -335,27 +340,40 @@ export default function Dashboard() {
   // Get auth user from Zustand store
   const { authUser, clearAuthUser } = useAuthUserStore();
 
-  // Check if user is authenticated on component mount and whenever authUser changes
   useEffect(() => {
-    if (!authUser) {
-      setModalOpen(true);
+    // Validate user on component mount
+    if (authUser) {
+      if (authUser.role === "superadmin") {
+        setIsAuthorized(true);
+        setIsLoading(false);
+      } else {
+        toast.error("Access denied! Superadmin role required.");
+        setIsAuthorized(false);
+        router.push("/login");
+      }
     } else {
-      setModalOpen(false);
+      toast.error("You must be logged in to access this page.");
+      router.push("/login");
     }
-  }, [authUser]);
+  }, [authUser, router]);
 
-  const handleModalClose = () => {
-    setModalOpen(false);
-    clearAuthUser(); // Optionally clear the auth user upon closing the modal
-    router.push("/login"); // Redirect to login page
+  const handleLogout = async () => {
+    try {
+      await signOut(); // Log out the user
+      clearAuthUser(); // Clear auth user from store
+      toast.success("Successfully logged out.");
+      router.push("/login");
+    } catch (error) {
+      toast.error("Error logging out. Please try again.");
+    }
   };
 
-  if (!authUser) {
+  if (!isAuthorized) {
     return (
-      <Modal isOpen={isModalOpen} onClose={handleModalClose}>
+      <Modal isOpen onClose={handleLogout}>
         <div>
-          <h2 className="text-lg font-semibold">Login Required</h2>
-          <p className="mt-2">You must be logged in to access this page.</p>
+          <h2 className="text-lg font-semibold">Access Denied</h2>
+          <p>You do not have permission to access this page.</p>
         </div>
       </Modal>
     );

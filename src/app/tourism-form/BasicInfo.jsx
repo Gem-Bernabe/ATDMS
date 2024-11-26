@@ -15,7 +15,19 @@ export default function BasicInfo() {
           >
             Municipality
           </label>
-          <Input id="municipality" {...register("municipality")} />
+          <select
+            id="municipality"
+            {...register("municipality", {
+              required: "Municipality is required",
+            })}
+            className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          >
+            <option value="">Select Municipality</option>
+            <option value="Baler">Baler</option>
+            <option value="San Luis">San Luis</option>
+            <option value="Maria Aurora">Maria Aurora</option>
+            <option value="Dipaculao">Dipaculao</option>
+          </select>
         </div>
         <div>
           <label
@@ -24,7 +36,13 @@ export default function BasicInfo() {
           >
             Establishment Name
           </label>
-          <Input id="establishmentName" {...register("establishmentName")} />
+          <Input
+            id="establishmentName"
+            placeholder="Enter establishment name"
+            {...register("establishmentName", {
+              required: "Establishment name is required",
+            })}
+          />
         </div>
         <div>
           <label
@@ -33,7 +51,13 @@ export default function BasicInfo() {
           >
             Business Address
           </label>
-          <Input id="businessAddress" {...register("businessAddress")} />
+          <Input
+            id="businessAddress"
+            placeholder="Enter business address"
+            {...register("businessAddress", {
+              required: "Business address is required",
+            })}
+          />
         </div>
         <div>
           <label
@@ -42,7 +66,18 @@ export default function BasicInfo() {
           >
             Contact Number
           </label>
-          <Input id="contactNumber" {...register("contactNumber")} />
+          <Input
+            id="contactNumber"
+            placeholder="Enter contact number"
+            type="text"
+            {...register("contactNumber", {
+              required: "Contact number is required",
+              pattern: {
+                value: /^[0-9+]*$/,
+                message: "Invalid contact number format",
+              },
+            })}
+          />
         </div>
         <div>
           <label
@@ -53,7 +88,10 @@ export default function BasicInfo() {
           </label>
           <Input
             id="accreditationNumber"
-            {...register("accreditationNumber")}
+            placeholder="Enter accreditation number"
+            {...register("accreditationNumber", {
+              required: "Accreditation number is required",
+            })}
           />
         </div>
         <div>
@@ -63,7 +101,14 @@ export default function BasicInfo() {
           >
             Expiration Date
           </label>
-          <Input id="expirationDate" {...register("expirationDate")} />
+          <Input
+            id="expirationDate"
+            type="date"
+            placeholder="Enter expiration date"
+            {...register("expirationDate", {
+              required: "Expiration date is required",
+            })}
+          />
         </div>
         <div>
           <label
@@ -72,7 +117,13 @@ export default function BasicInfo() {
           >
             LGU License Number
           </label>
-          <Input id="licenseNumber" {...register("licenseNumber")} />
+          <Input
+            id="licenseNumber"
+            placeholder="Enter LGU license number"
+            {...register("licenseNumber", {
+              required: "LGU license number is required",
+            })}
+          />
         </div>
         <div>
           <label
@@ -81,7 +132,13 @@ export default function BasicInfo() {
           >
             Contact Person
           </label>
-          <Input id="contactPerson" {...register("contactPerson")} />
+          <Input
+            id="contactPerson"
+            placeholder="Enter contact person's name"
+            {...register("contactPerson", {
+              required: "Contact person is required",
+            })}
+          />
         </div>
         <div>
           <label
@@ -90,7 +147,13 @@ export default function BasicInfo() {
           >
             Designation
           </label>
-          <Input id="designation" {...register("designation")} />
+          <Input
+            id="designation"
+            placeholder="Enter designation"
+            {...register("designation", {
+              required: "Designation is required",
+            })}
+          />
         </div>
         <div>
           <label
@@ -99,7 +162,18 @@ export default function BasicInfo() {
           >
             Email
           </label>
-          <Input id="email" type="email" {...register("email")} />
+          <Input
+            id="email"
+            type="email"
+            placeholder="Enter email address"
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: "Invalid email address format",
+              },
+            })}
+          />
         </div>
         <div>
           <label
@@ -108,7 +182,13 @@ export default function BasicInfo() {
           >
             Facebook
           </label>
-          <Input id="facebook" {...register("facebook")} />
+          <Input
+            id="facebook"
+            placeholder="Enter Facebook URL"
+            {...register("facebook", {
+              required: "Facebook URL is required",
+            })}
+          />
         </div>
         <div>
           <label
@@ -117,7 +197,13 @@ export default function BasicInfo() {
           >
             Instagram
           </label>
-          <Input id="instagram" {...register("instagram")} />
+          <Input
+            id="instagram"
+            placeholder="Enter Instagram URL"
+            {...register("instagram", {
+              required: "Instagram URL is required",
+            })}
+          />
         </div>
         <div>
           <label
@@ -126,7 +212,13 @@ export default function BasicInfo() {
           >
             Twitter
           </label>
-          <Input id="twitter" {...register("twitter")} />
+          <Input
+            id="twitter"
+            placeholder="Enter Twitter URL"
+            {...register("twitter", {
+              required: "Twitter URL is required",
+            })}
+          />
         </div>
         <div>
           <label
@@ -135,7 +227,19 @@ export default function BasicInfo() {
           >
             Other Website
           </label>
-          <Input id="website" {...register("website")} />
+          <Input
+            id="website"
+            type="url"
+            placeholder="Enter website URL"
+            {...register("website", {
+              required: "Website is required",
+              pattern: {
+                value:
+                  /^(https?:\/\/)?([a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/,
+                message: "Invalid URL format. Example: https://example.com",
+              },
+            })}
+          />
         </div>
         <div>
           <label
@@ -144,7 +248,13 @@ export default function BasicInfo() {
           >
             Booking Company, Please Specify
           </label>
-          <Input id="bookingCompany" {...register("bookingCompany")} />
+          <Input
+            id="bookingCompany"
+            placeholder="Enter booking company"
+            {...register("bookingCompany", {
+              required: "Booking company is required",
+            })}
+          />
         </div>
       </div>
     </TabsContent>

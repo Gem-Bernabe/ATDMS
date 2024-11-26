@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { TabsContent } from "@/components/ui/tabs";
 
-
 export default function Rooms() {
   const { register, control } = useFormContext();
   const { fields: acRoomFields, append: appendAcRoom } = useFieldArray({

@@ -6,7 +6,6 @@ const appwriteConfig = {
   projectId: "672cfc4e003a4709c911",
   databaseId: "672cfccb002f456cb332",
   userCollectionId: "672cfcd0003c114264cd",
-  accommodationsCollectionId: "6741d7f2000200706b21", // Your Appwrite client collection ID
 };
 
 if (!appwriteConfig.endpoint || !appwriteConfig.projectId) {

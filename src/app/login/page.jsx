@@ -28,7 +28,7 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const { setAuthUser, authUser } = useAuthUserStore();
+  const { setAuthUser } = useAuthUserStore();
 
   const handleRoleRedirect = async () => {
     try {
@@ -84,7 +84,7 @@ export default function AuthPage() {
     }
     setIsLoading(true);
     try {
-      const newUser = await createUser(email, password, fullName);
+      await createUser(email, password, fullName);
       toast.success("Account created successfully! Please log in.");
       setActiveTab("login"); // Switch to login tab
     } catch (error) {

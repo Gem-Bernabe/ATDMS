@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Card,
@@ -23,6 +23,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Sidebar,
   SidebarContent,
@@ -35,8 +37,6 @@ import {
   SidebarMenuButton,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import {
   Calendar as CalendarIcon,
   CheckCircle,
@@ -48,12 +48,14 @@ import {
   FileText,
   Home,
 } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Modal from "@/components/modal";
 import { useAuthUserStore } from "@/services/user";
-import { signOut } from "@/services/appwrite";
 
-// Mock data for hotels
+// Mock data for hotels and inspections
 const hotels = [
   {
     id: 1,
@@ -62,43 +64,62 @@ const hotels = [
     status: "Scheduled",
     nextInspection: "2023-11-15",
   },
+  // Other hotel data...
 ];
 
+const inspectionForm = {
+  hotelName: "Seaside Resort",
+  inspectionDate: "2023-05-15",
+  inspector: "John Doe",
+  categories: [
+    {
+      name: "Cleanliness",
+      score: 9,
+      maxScore: 10,
+      comments: "Very clean overall, minor issues in lobby",
+    },
+    // Other categories...
+  ],
+  overallComments:
+    "Seaside Resort maintains a high standard of service and cleanliness. Some minor improvements needed in safety equipment and pool area maintenance.",
+  status: "Pending",
+};
+
 export default function MunicipalityInspectorDashboard() {
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [selectedHotel, setSelectedHotel] = useState(hotels[0]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const { authUser, clearAuthUser } = useAuthUserStore();
+  const [selectedHotel, setSelectedHotel] = React.useState(hotels[0]);
+  const [selectedDate, setSelectedDate] = React.useState(new Date());
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [currentForm, setCurrentForm] = React.useState(inspectionForm);
+  const [isModalOpen, setModalOpen] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    // Validate user on component mount
-    if (authUser) {
-      if (authUser.role === "admin") {
-        setIsAuthorized(true);
-        setIsLoading(false);
-      } else {
-        toast.error("Access denied! Admin role required.");
-        setIsAuthorized(false);
-        router.push("/login");
-      }
-    } else {
-      toast.error("You must be logged in to access this page.");
-      router.push("/login");
-    }
-  }, [authUser, router]);
+  // Zustand store for authentication
+  const { authUser, clearAuthUser } = useAuthUserStore();
 
-  const handleLogout = async () => {
-    try {
-      await signOut(); // Log out the user
-      clearAuthUser(); // Clear auth user from store
-      toast.success("Successfully logged out.");
-      router.push("/login");
-    } catch (error) {
-      toast.error("Error logging out. Please try again.");
+  useEffect(() => {
+    if (!authUser) {
+      setModalOpen(true);
+    } else {
+      setModalOpen(false);
     }
+  }, [authUser]);
+
+  const handleLogout = () => {
+    clearAuthUser(); // Clear user session
+    toast.success("You have been successfully logged out.");
+    router.push("/login"); // Redirect to login
   };
+
+  if (!authUser) {
+    return (
+      <Modal isOpen={isModalOpen} onClose={handleLogout}>
+        <div>
+          <h2 className="text-lg font-semibold">Login Required</h2>
+          <p className="mt-2">You must be logged in to access this page.</p>
+        </div>
+      </Modal>
+    );
+  }
 
   const filteredHotels = hotels.filter((hotel) =>
     hotel.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -118,17 +139,6 @@ export default function MunicipalityInspectorDashboard() {
         return "bg-gray-500";
     }
   };
-
-  if (!isAuthorized) {
-    return (
-      <Modal isOpen onClose={handleLogout}>
-        <div>
-          <h2 className="text-lg font-semibold">Access Denied</h2>
-          <p>You do not have permission to access this page.</p>
-        </div>
-      </Modal>
-    );
-  }
 
   return (
     <SidebarProvider>
@@ -183,51 +193,12 @@ export default function MunicipalityInspectorDashboard() {
         </Sidebar>
 
         <div className="flex-1 overflow-auto">
+          {/* Dashboard Content */}
           <div className="container mx-auto p-6 space-y-6">
             <h1 className="text-3xl font-bold">
               Municipality Inspector Dashboard
             </h1>
-
-            {/* Hotel Inspection Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Hotels</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Input
-                  placeholder="Search hotels..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="mb-4"
-                />
-                <ScrollArea>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Hotel Name</TableHead>
-                        <TableHead>Last Inspection</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Next Inspection</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredHotels.map((hotel) => (
-                        <TableRow key={hotel.id}>
-                          <TableCell>{hotel.name}</TableCell>
-                          <TableCell>{hotel.lastInspection}</TableCell>
-                          <TableCell>
-                            <Badge className={getStatusColor(hotel.status)}>
-                              {hotel.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{hotel.nextInspection}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+            {/* Other sections like Hotel Inspections, Calendar, and Details */}
           </div>
         </div>
       </div>

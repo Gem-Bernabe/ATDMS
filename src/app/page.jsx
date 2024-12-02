@@ -1,20 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from 'next/link';
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  MapPin,
-  Star,
-  Coffee,
-  Wifi,
-  Dumbbell,
-  Search,
-  Map,
-  LifeBuoy,
-  Sparkles,
-  Car,
-  ChevronDown,
-} from "lucide-react";
+import { MapPin, Star, Coffee, Wifi, Dumbbell, Search, Map, LifeBuoy, Sparkles, Car, ChevronDown, Users, Info, Sun, Waves, Mountain, Camera, Utensils, Plane } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -41,6 +30,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+
 
 const hotels = [
   {
@@ -106,13 +110,145 @@ const hotels = [
 ];
 
 const amenitiesOptions = [
-  { value: "wifi", label: "Wi-Fi", icon: Wifi },
-  { value: "gym", label: "Gym", icon: Dumbbell },
-  { value: "restaurant", label: "Restaurant", icon: Coffee },
-  { value: "pool", label: "Pool", icon: LifeBuoy },
-  { value: "spa", label: "Spa", icon: Sparkles },
-  { value: "parking", label: "Parking", icon: Car },
+  { value: "wifi", label: "Wi-Fi", icon: Wifi, description: "Free Wi-Fi available" },
+  { value: "gym", label: "Gym", icon: Dumbbell, description: "Fully equipped fitness center" },
+  { value: "restaurant", label: "Restaurant", icon: Coffee, description: "On-site dining options" },
+  { value: "pool", label: "Pool", icon: LifeBuoy, description: "Swimming pool access" },
+  { value: "spa", label: "Spa", icon: Sparkles, description: "Relaxing spa services" },
+  { value: "parking", label: "Parking", icon: Car, description: "Free parking available" },
 ];
+
+const attractions = [
+  {
+    name: "Sabang Beach",
+    description:
+      "A 2-kilometer stretch of gray sand beach known for its surfing waves. Perfect for beginners and experienced surfers alike.",
+    icon: Waves,
+  },
+  {
+    name: "Dicasalarin Cove",
+    description:
+      "A secluded white sand beach surrounded by rolling hills. Offers breathtaking views and is ideal for swimming and picnics.",
+    icon: Sun,
+  },
+  {
+    name: "Diguisit Falls",
+    description:
+      "A series of cascading waterfalls surrounded by lush greenery. A great spot for nature lovers and photographers.",
+    icon: Mountain,
+  },
+];
+
+function HeroSection() {
+  return (
+    <div className="relative h-[60vh] bg-cover bg-center flex items-center justify-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1578645510447-e20b4311e3ce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80')"}}>
+      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+      <div className="relative z-10 text-center text-white">
+        <h1 className="text-5xl font-bold mb-4">Discover Central Aurora</h1>
+        <p className="text-xl mb-8">Experience the beauty of Province of Central Aurora' hidden gem</p>
+        <Link href="/hotels/booking">
+        <Button className="bg-teal-600 hover:bg-teal-700 text-white">Start Your Adventure</Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function FeatureCard({ icon: Icon, title, description }) {
+  return (
+    <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <CardHeader>
+        <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4">
+          <Icon className="w-6 h-6 text-teal-600" />
+        </div>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-gray-600">{description}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function HotelCard({ hotel, index }) {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <motion.div
+      key={hotel.id}
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+    >
+      <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white">
+        <CardHeader className="p-0">
+          <div className="relative">
+            {isLoading ? (
+              <Skeleton className="w-full h-48" />
+            ) : (
+              <img
+                src={hotel.image}
+                alt={hotel.name}
+                className="w-full h-48 object-cover"
+                onLoad={() => setIsLoading(false)}
+              />
+            )}
+            <Badge className="absolute top-2 right-2 bg-teal-600 text-white">
+              ₱{hotel.price.toLocaleString()}/night
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="p-4">
+          <CardTitle className="text-lg font-semibold text-gray-800">{hotel.name}</CardTitle>
+          <CardDescription className="flex items-center mt-2">
+            <Star className="h-5 w-5 text-yellow-400 mr-1" />
+            <span className="font-medium text-gray-700">{hotel.rating.toFixed(1)}</span>
+            <span className="ml-2 text-sm text-gray-500">{hotel.location}</span>
+          </CardDescription>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {hotel.amenities.map((amenity) => {
+              const amenityOption = amenitiesOptions.find(
+                (a) => a.value === amenity
+              );
+              if (amenityOption) {
+                return (
+                  <TooltipProvider key={amenity}>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Badge variant="outline" className="flex items-center border-teal-200 text-teal-700">
+                          <amenityOption.icon className="h-3 w-3 mr-1" />
+                          {amenityOption.label}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{amenityOption.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              }
+              return null;
+            })}
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-between items-center bg-gray-50 border-t border-gray-100">
+          <Button variant="outline" className="flex items-center text-teal-600 hover:text-teal-700 hover:bg-teal-50">
+            <Info className="h-4 w-4 mr-2" />
+            More Info
+          </Button>
+          <Button className="bg-teal-600 hover:bg-teal-700 text-white">
+            Book Now
+          </Button>
+        </CardFooter>
+      </Card>
+    </motion.div>
+  );
+}
 
 function HotelListingComponent() {
   const [filteredHotels, setFilteredHotels] = useState(hotels);
@@ -121,13 +257,17 @@ function HotelListingComponent() {
   const [sortOption, setSortOption] = useState("rating");
   const [showMap, setShowMap] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [dateRange, setDateRange] = useState({ from: null, to: null });
   const hotelsPerPage = 4;
 
   useEffect(() => {
     let result = hotels.filter(
       (hotel) =>
         hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        selectedAmenities.every((amenity) => hotel.amenities.includes(amenity))
+        (selectedAmenities.length === 0 ||
+          selectedAmenities.every((amenity) =>
+            hotel.amenities.includes(amenity)
+          ))
     );
 
     if (sortOption === "rating") {
@@ -168,8 +308,8 @@ function HotelListingComponent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-100 to-cyan-200">
-      <header className="bg-white shadow-md p-4 sticky top-0 z-10">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <header className="bg-white shadow-md p-4 sticky top-0 z-10 border-b border-gray-200">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <MapPin className="h-8 w-8 text-teal-600" />
@@ -179,30 +319,48 @@ function HotelListingComponent() {
           </div>
           <nav className="flex items-center space-x-4">
             <Button variant="ghost">About</Button>
+            <Button variant="ghost">FAQ</Button>
+            <Button className="bg-teal-600 hover:bg-teal-700 text-white">Book Now</Button>
           </nav>
         </div>
       </header>
 
-      <main className="container mx-auto p-4">
-        <motion.div
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-8 text-center"
-        >
-          <h2 className="text-4xl font-bold text-gray-800 mb-2">
-            Discover Central Aurora
-          </h2>
-          <p className="text-xl text-gray-600">
-            Find your perfect stay in the heart of Aurora
-          </p>
-        </motion.div>
+      <HeroSection />
+
+      <main className="container mx-auto p-4 space-y-12">
+        <section className="py-12 bg-white rounded-lg shadow-md">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-8">Why Choose Central Aurora?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <FeatureCard
+                icon={Sun}
+                title="Pristine Beaches"
+                description="Miles of untouched coastline perfect for surfing and relaxation."
+              />
+              <FeatureCard
+                icon={Users}
+                title="Rich Culture"
+                description="Experience the warm hospitality and traditions of Aurora."
+              />
+              <FeatureCard
+                icon={Mountain}
+                title="Adventure Sports"
+                description="From surfing to trekking, adventure awaits at every corner."
+              />
+              <FeatureCard
+                icon={Camera}
+                title="Scenic Beauty"
+                description="Capture breathtaking landscapes and unforgettable moments."
+              />
+            </div>
+          </div>
+        </section>
 
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="mb-8 flex flex-wrap gap-4 items-center justify-between bg-white p-6 rounded-lg shadow-md"
+          className="flex flex-wrap gap-4 items-center justify-between bg-white p-6 rounded-lg shadow-md border border-gray-200"
         >
           <div className="flex-1 min-w-[200px]">
             <Label htmlFor="search">Search Hotels</Label>
@@ -280,15 +438,14 @@ function HotelListingComponent() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5 }}
-              className="mb-8 bg-white p-4 rounded-lg shadow-md"
+              className="mb-8 bg-white p-4 rounded-lg shadow-md border border-gray-200"
             >
               <div className="relative w-full aspect-[16/9] bg-white rounded-lg overflow-hidden">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3941.9999999999995!2d121.56000000000002!3d15.760000000000002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c00000000001%3A0x0000000000000000!2sBaler%2C%20Aurora%2C%20Philippines!5e0!3m2!1sen!2sus!4v1610000000000!5m2!1sen!2sus"
-                  width="90%"
-                  height="90%"
-                  frameBorder="0"
-                  style={{ border: 15 }}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
                   allowFullScreen={false}
                   aria-hidden="false"
                   tabIndex={0}
@@ -296,7 +453,7 @@ function HotelListingComponent() {
                 ></iframe>
                 <div className="absolute bottom-4 right-4 bg-white p-2 rounded-lg shadow-md">
                   <p className="text-sm font-semibold">Central Aurora Region</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-500">
                     Showing {filteredHotels.length} hotels
                   </p>
                 </div>
@@ -310,62 +467,22 @@ function HotelListingComponent() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8"
               >
-                {currentHotels.map((hotel, index) => (
-                  <motion.div
-                    key={hotel.id}
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                  >
-                    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
-                      <CardHeader className="p-0">
-                        <div className="relative">
-                          <img
-                            src={hotel.image}
-                            alt={hotel.name}
-                            className="w-full h-48 object-cover"
-                          />
-                          <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded-full text-sm font-semibold text-gray-800">
-                            ₱{hotel.price}/night
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-4">
-                        <CardTitle>{hotel.name}</CardTitle>
-                        <CardDescription className="flex items-center mt-2">
-                          <Star className="h-5 w-5 text-yellow-400 mr-1" />
-                          {hotel.rating.toFixed(1)}
-                        </CardDescription>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {hotel.amenities.map((amenity) => {
-                            const amenityOption = amenitiesOptions.find(
-                              (a) => a.value === amenity
-                            );
-                            if (amenityOption) {
-                              return (
-                                <span
-                                  key={amenity}
-                                  className="bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-0.5 rounded flex items-center"
-                                >
-                                  <amenityOption.icon className="h-3 w-3 mr-1" />
-                                  {amenityOption.label}
-                                </span>
-                              );
-                            }
-                            return null;
-                          })}
-                        </div>
-                      </CardContent>
-                      <CardFooter>
-                        <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">
-                          View Details
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  </motion.div>
-                ))}
+                {currentHotels.length > 0 ? (
+                  currentHotels.map((hotel, index) => (
+                    <HotelCard key={hotel.id} hotel={hotel} index={index} />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-10">
+                    <p className="text-xl font-semibold text-gray-600">
+                      No hotels found matching your criteria.
+                    </p>
+                    <p className="text-gray-500 mt-2">
+                      Try adjusting your filters or search terms.
+                    </p>
+                  </div>
+                )}
               </motion.div>
               <div className="flex justify-center gap-2">
                 {Array.from(
@@ -384,10 +501,78 @@ function HotelListingComponent() {
             </>
           )}
         </AnimatePresence>
+
+        <section className="py-12 bg-white rounded-lg shadow-md">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-8">Popular Attractions</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {attractions.map((attraction) => (
+                <Card key={attraction.name} className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-xl font-semibold text-gray-800">
+                      <attraction.icon className="h-6 w-6 mr-2 text-teal-600" />
+                      {attraction.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">{attraction.description}</p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="outline" className="w-full">Learn More</Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 bg-teal-600 rounded-lg shadow-md text-white">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold mb-4">Ready for Your Aurora Adventure?</h2>
+            <p className="text-xl mb-8">Book your stay now and experience the wonders of Central Aurora!</p>
+            <Button size="lg" variant="secondary" className="bg-white text-teal-600 hover:bg-gray-100">
+              Start Booking
+            </Button>
+          </div>
+        </section>
       </main>
-      <footer className="bg-white py-8 mt-8">
-        <div className="container mx-auto text-center">
-          <p>&copy; 2024 Central Aurora Explorer. All rights reserved.</p>
+
+      <footer className="bg-gray-800 text-white py-12 mt-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="text-xl font-semibold mb-4">About Us</h3>
+              <p className="text-gray-300">Central Aurora Explorer is your gateway to discovering the hidden gems of the Philippines. We're dedicated to providing unforgettable experiences in this beautiful region.</p>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold mb-4">Quick Links</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-300 hover:text-white">Home</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white">Hotels</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white">Attractions</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white">Contact</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold mb-4">Contact Us</h3>
+              <p className="text-gray-300">Email: info@centralaurora.com</p>
+              <p className="text-gray-300">Phone: +63 123 456 7890</p>
+              <div className="flex space-x-4 mt-4">
+                <a href="#" className="text-gray-300 hover:text-white"><Plane className="h-6 w-6" /></a>
+                <a href="#" className="text-gray-300 hover:text-white"><Camera className="h-6 w-6" /></a>
+                <a href="#" className="text-gray-300 hover:text-white"><Utensils className="h-6 w-6" /></a>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-700 mt-8 pt-8 text-center">
+            <p>&copy; 2024 Central Aurora Explorer. All rights reserved.</p>
+          </div>
+          <div className="border-t border-gray-700 mt-8 pt-8 text-center"></div>
+          <div className="flex flex-wrap items-center space-x-4 mt-2 md:mt-0">
+          <p className="text-xs text-gray-400">Powered by Vercel</p>
+          <p className="text-xs text-gray-400">By Aurora State College of Technology</p>
+          <p className="text-xs text-gray-400">Partnered with Aurora Provincial Tourism Office</p>
+        </div>
         </div>
       </footer>
     </div>
@@ -395,3 +580,4 @@ function HotelListingComponent() {
 }
 
 export default HotelListingComponent;
+

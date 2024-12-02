@@ -110,7 +110,7 @@ export default function AuthPage() {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="login">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
@@ -153,7 +153,7 @@ export default function AuthPage() {
                     </div>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Loading..." : "Login"}
+                    {isLoading ? "Loading..." : "Sign In"}
                   </Button>
                 </div>
               </form>

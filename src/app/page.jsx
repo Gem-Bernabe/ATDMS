@@ -1,9 +1,7 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { MapPin, Star, Coffee, Wifi, Dumbbell, Search, Map, LifeBuoy, Sparkles, Car, ChevronDown, Calendar, Sun, Waves, Mountain } from "lucide-react";
+import { MapPin, Star, Coffee, Wifi, Dumbbell, Search, Map, LifeBuoy, Sparkles, Car, ChevronDown, Calendar, Sun, Waves, Mountain, Users, Phone, Mail, Globe, Clock } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,7 +30,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, addDays } from "date-fns";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
 
 const hotels = [
   {
@@ -44,6 +46,19 @@ const hotels = [
       "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/12/bb/65/a8/costa-pacifica.jpg?w=1200&h=-1&s=1",
     location: "Baler, Aurora",
     amenities: ["wifi", "gym", "restaurant", "pool", "spa"],
+    description: "Luxurious beachfront resort with stunning ocean views and world-class amenities.",
+    reviews: [
+      { id: 1, user: "John D.", rating: 5, comment: "Absolutely stunning resort with impeccable service!" },
+      { id: 2, user: "Sarah M.", rating: 4, comment: "Beautiful location, but the food could be better." },
+      { id: 3, user: "Mike R.", rating: 5, comment: "Perfect getaway spot. Will definitely come back!" },
+    ],
+    contact: {
+      phone: "+63 2 8519 4249",
+      email: "info@costapacificabaler.com",
+      website: "https://www.costapacificabaler.com",
+    },
+    checkIn: "2:00 PM",
+    checkOut: "12:00 PM",
   },
   {
     id: 2,
@@ -54,6 +69,18 @@ const hotels = [
       "https://pix8.agoda.net/property/60263241/0/ea45117c4c9930d33d6b9749a4a5055c.jpeg?ce=0&s=1024x",
     location: "Baler, Aurora",
     amenities: ["wifi", "restaurant", "parking"],
+    description: "Cozy beachfront resort offering comfortable accommodations and easy access to Sabang Beach.",
+    reviews: [
+      { id: 1, user: "Emily L.", rating: 4, comment: "Great location and friendly staff. Rooms are basic but clean." },
+      { id: 2, user: "David K.", rating: 5, comment: "Excellent value for money. The restaurant serves delicious local cuisine." },
+    ],
+    contact: {
+      phone: "+63 919 991 3075",
+      email: "baysinnresort@gmail.com",
+      website: "https://www.baysinnresort.com",
+    },
+    checkIn: "2:00 PM",
+    checkOut: "12:00 PM",
   },
   {
     id: 3,
@@ -64,36 +91,18 @@ const hotels = [
       "https://media-cdn.tripadvisor.com/media/photo-s/12/a7/3f/e8/img-20180324-064351-largejpg.jpg",
     location: "Baler, Aurora",
     amenities: ["wifi", "parking", "restaurant"],
-  },
-  {
-    id: 4,
-    name: "Pacific Waves Inn",
-    rating: 4.3,
-    price: 7150,
-    image:
-      "https://cf.bstatic.com/xdata/images/hotel/max1024x768/424217898.jpg?k=ef05b39cde8869464caabf8c31d4ed4145431c2d978ac3b3e931616730465e4c&o=&hp=1",
-    location: "Baler, Aurora",
-    amenities: ["wifi", "restaurant", "parking"],
-  },
-  {
-    id: 5,
-    name: "Nalu Surf Camp",
-    rating: 4.6,
-    price: 8800,
-    image:
-      "https://nalusurfcamp.ph/wp-content/uploads/2022/03/nalu-about-us-1.png",
-    location: "Baler, Aurora",
-    amenities: ["wifi", "restaurant", "parking", "pool"],
-  },
-  {
-    id: 6,
-    name: "S.M.A.R.T Beach House Aurora",
-    rating: 4.1,
-    price: 6050,
-    image:
-      "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0a/7f/a6/0b/20160226-081837-largejpg.jpg?w=1200&h=-1&s=1",
-    location: "Baler, Aurora",
-    amenities: ["wifi", "parking", "restaurant"],
+    description: "Laid-back surf camp offering surf lessons, board rentals, and beachfront accommodations.",
+    reviews: [
+      { id: 1, user: "Alex S.", rating: 4, comment: "Great spot for surfing enthusiasts. Instructors are knowledgeable and friendly." },
+      { id: 2, user: "Lisa M.", rating: 3, comment: "Basic accommodations, but perfect for those focused on surfing." },
+    ],
+    contact: {
+      phone: "+63 917 794 7749",
+      email: "aliyasurfcamp@gmail.com",
+      website: "https://www.aliyasurfcamp.com",
+    },
+    checkIn: "1:00 PM",
+    checkOut: "11:00 AM",
   },
 ];
 
@@ -132,6 +141,7 @@ function HotelListingComponent() {
   const [showMap, setShowMap] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [dateRange, setDateRange] = useState({ from: new Date(), to: addDays(new Date(), 7) });
+  const [selectedHotel, setSelectedHotel] = useState(null);
   const hotelsPerPage = 4;
 
   useEffect(() => {
@@ -155,10 +165,7 @@ function HotelListingComponent() {
 
   const indexOfLastHotel = currentPage * hotelsPerPage;
   const indexOfFirstHotel = indexOfLastHotel - hotelsPerPage;
-  const currentHotels = filteredHotels.slice(
-    indexOfFirstHotel,
-    indexOfLastHotel
-  );
+  const currentHotels = filteredHotels.slice(indexOfFirstHotel, indexOfLastHotel);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -175,6 +182,29 @@ function HotelListingComponent() {
       setSelectedAmenities(amenitiesOptions.map((amenity) => amenity.value));
     } else {
       setSelectedAmenities([]);
+    }
+  };
+
+  const openHotelDetails = (hotel) => {
+    setSelectedHotel(hotel);
+  };
+
+  const closeHotelDetails = () => {
+    setSelectedHotel(null);
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Completed":
+        return "bg-green-500";
+      case "Scheduled":
+        return "bg-blue-500";
+      case "Pending Approval":
+        return "bg-yellow-500";
+      case "Overdue":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
@@ -300,7 +330,7 @@ function HotelListingComponent() {
                   mode="range"
                   selected={dateRange}
                   onSelect={setDateRange}
-numberOfMonths={2}
+                  numberOfMonths={2}
                 />
               </PopoverContent>
             </Popover>
@@ -328,14 +358,12 @@ numberOfMonths={2}
               <div className="relative w-full aspect-[16/9] bg-white rounded-lg overflow-hidden">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3941.9999999999995!2d121.56000000000002!3d15.760000000000002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c00000000001%3A0x0000000000000000!2sBaler%2C%20Aurora%2C%20Philippines!5e0!3m2!1sen!2sus!4v1610000000000!5m2!1sen!2sus"
-                  width="90%"
-                  height="90%"
-                  frameBorder="0"
-                  style={{ border: 15 }}
-                  allowFullScreen={false}
-                  aria-hidden="false"
-                  tabIndex={0}
-                  title="Map of Central Aurora Hotels"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen=""
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
                 ></iframe>
                 <div className="absolute bottom-4 right-4 bg-white p-2 rounded-lg shadow-md">
                   <p className="text-sm font-semibold">Central Aurora Region</p>
@@ -382,6 +410,7 @@ numberOfMonths={2}
                             <Star className="h-5 w-5 text-yellow-400 mr-1" />
                             {hotel.rating.toFixed(1)}
                           </CardDescription>
+                          <p className="text-sm text-gray-600 mt-2">{hotel.description}</p>
                           <div className="mt-4 flex flex-wrap gap-2">
                             {hotel.amenities.map((amenity) => {
                               const amenityOption = amenitiesOptions.find(
@@ -403,7 +432,7 @@ numberOfMonths={2}
                           </div>
                         </CardContent>
                         <CardFooter>
-                          <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+                          <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" onClick={() => openHotelDetails(hotel)}>
                             View Details
                           </Button>
                         </CardFooter>
@@ -501,6 +530,132 @@ numberOfMonths={2}
           <p>&copy; 2024 Central Aurora Explorer. All rights reserved.</p>
         </div>
       </footer>
+
+      <Dialog open={selectedHotel !== null} onOpenChange={closeHotelDetails}>
+        <DialogContent className="max-w-4xl">
+          {selectedHotel && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedHotel.name}</DialogTitle>
+                <DialogDescription>{selectedHotel.location}</DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <img src={selectedHotel.image} alt={selectedHotel.name} className="w-full h-64 object-cover rounded-lg" />
+                  <div className="mt-4">
+                    <h4 className="font-semibold mb-2">Description</h4>
+                    <p className="text-sm text-gray-600">{selectedHotel.description}</p>
+                  </div>
+                  <div className="mt-4">
+                    <h4 className="font-semibold mb-2">Amenities</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedHotel.amenities.map((amenity) => {
+                        const amenityOption = amenitiesOptions.find((a) => a.value === amenity);
+                        if (amenityOption) {
+                          return (
+                            <span key={amenity} className="bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-0.5 rounded flex items-center">
+                              <amenityOption.icon className="h-3 w-3 mr-1" />
+                              {amenityOption.label}
+                            </span>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <Tabs defaultValue="details">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="details">Details</TabsTrigger>
+                      <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                      <TabsTrigger value="location">Location</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="details">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Hotel Details</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center">
+                            <Clock className="h-5 w-5 mr-2 text-teal-600" />
+                            <span>Check-in: {selectedHotel.checkIn} | Check-out: {selectedHotel.checkOut}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Phone className="h-5 w-5 mr-2 text-teal-600" />
+                            <span>{selectedHotel.contact.phone}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Mail className="h-5 w-5 mr-2 text-teal-600" />
+                            <span>{selectedHotel.contact.email}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Globe className="h-5 w-5 mr-2 text-teal-600" />
+                            <a href={selectedHotel.contact.website} target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">
+                              Visit Website
+                            </a>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    <TabsContent value="reviews">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Guest Reviews</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            {selectedHotel.reviews.map((review) => (
+                              <div key={review.id} className="border-b pb-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center">
+                                    <Avatar className="h-8 w-8 mr-2">
+                                      <AvatarFallback>{review.user[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <span className="font-semibold">{review.user}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Star className="h-5 w-5 text-yellow-400 mr-1" />
+                                    <span>{review.rating}</span>
+                                  </div>
+                                </div>
+                                <p className="mt-2 text-sm text-gray-600">{review.comment}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    <TabsContent value="location">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Location</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="aspect-w-16 aspect-h-9">
+                            <iframe
+                              src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3941.9999999999995!2d121.56000000000002!3d15.760000000000002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c00000000001%3A0x0000000000000000!2s${encodeURIComponent(selectedHotel.name)}%2C%20Baler%2C%20Aurora%2C%20Philippines!5e0!3m2!1sen!2sus!4v1610000000000!5m2!1sen!2sus`}
+                              width="100%"
+                              height="100%"
+                              style={{ border: 0 }}
+                              allowFullScreen=""
+                              loading="lazy"
+                              referrerPolicy="no-referrer-when-downgrade"
+                            ></iframe>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              </div>
+              <div className="mt-6">
+                <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">Book Now</Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

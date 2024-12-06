@@ -134,3 +134,44 @@ export const createDocument = async (collectionId, data) => {
     throw error;
   }
 };
+
+export async function fetchAccommodations() {
+  try {
+    const result = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.accommodationsCollectionId
+    );
+    return result.documents; // Return the list of accommodations
+  } catch (error) {
+    console.error("Failed to fetch accommodations:", error);
+    throw new Error("Failed to fetch accommodations");
+  }
+}
+
+export const fetchMunicipalityData = async () => {
+  try {
+    const response = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.accommodationsCollectionId
+    );
+    return response.documents;
+  } catch (error) {
+    console.error("Error fetching municipality data:", error);
+    return [];
+  }
+};
+
+// Fetch Specific Accommodations
+export async function fetchSpecificAccommodations(municipality) {
+  try {
+    const response = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.accommodationsCollectionId,
+      [Query.equal("municipality", municipality)]
+    );
+    return response.documents;
+  } catch (error) {
+    console.error("Error fetching accommodations:", error);
+    throw new Error("Failed to fetch specific accommodations");
+  }
+}

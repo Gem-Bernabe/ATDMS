@@ -62,7 +62,7 @@ export default function TourismForm() {
     return url;
   };
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data = {}) => {
     const accommodationId = uuidv4(); // Generate a unique ID for this accommodation
     try {
       // Normalize website URL

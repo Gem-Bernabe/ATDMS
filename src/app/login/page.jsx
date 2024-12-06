@@ -7,9 +7,9 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LockIcon, MailIcon, UserIcon } from "lucide-react";
@@ -20,7 +20,10 @@ import "react-toastify/dist/ReactToastify.css";
 import { useAuthUserStore } from "@/services/user";
 
 export default function AuthPage() {
-  const [activeTab, setActiveTab] = useState("login");
+  const [_, setActiveTab] = useState("login");
+  const handleTabChange = (value) => {
+    setActiveTab(value);
+  };
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -28,7 +31,7 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const { setAuthUser, authUser } = useAuthUserStore();
+  const { setAuthUser } = useAuthUserStore() || {};
 
   const handleRoleRedirect = async () => {
     try {
@@ -84,7 +87,7 @@ export default function AuthPage() {
     }
     setIsLoading(true);
     try {
-      const newUser = await createUser(email, password, fullName);
+      await createUser(email, password, fullName);
       toast.success("Account created successfully! Please log in.");
       setActiveTab("login"); // Switch to login tab
     } catch (error) {
@@ -108,7 +111,7 @@ export default function AuthPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs defaultValue="login" onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
